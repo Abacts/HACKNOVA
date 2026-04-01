@@ -1,0 +1,182 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "84a9a754-d3a4-4735-b1e3-de7a868f3018",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  {\n    json: {\n      ticker: \"ICICIBANK\",\n      previous_close: 1200,\n      current_close: 1235\n    }\n  },\n  {\n    json: {\n      ticker: \"HCLTECH\",\n      previous_close: 1800,\n      current_close: 1760\n    }\n  },\n  {\n    json: {\n      ticker: \"SUNPHARMA\",\n      previous_close: 1850,\n      current_close: 1858\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "4f2a0b35-2bce-49d4-ae1b-775b22519e7b",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  const prev = item.json.previous_close;\n  const curr = item.json.current_close;\n  const pct_change = ((curr - prev) / prev) * 100;\n\n  return {\n    json: {\n      ...item.json,\n      pct_change: Number(pct_change.toFixed(2)),\n      alert: Math.abs(pct_change) > 2\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "f3644b00-2ea2-47ea-9fcb-2748b36205a0",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "535d2305-0eb1-4357-b17c-a5ceeed38fd7",
+              "leftValue": "={{$json.alert}}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        624,
+        0
+      ],
+      "id": "1a93f4c5-9678-4dfc-b560-146862e8090a",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  return {\n    json: {\n      message: `ALERT: ${item.json.ticker} moved ${item.json.pct_change}% from previous close. Previous close was ${item.json.previous_close} and current close is ${item.json.current_close}.`\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        832,
+        -96
+      ],
+      "id": "bc74cabb-64ef-4d31-9e98-cea0d645aed6",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "sendTo": "shashwatsingh127@gmail.com",
+        "subject": "Stock Price Alert",
+        "message": "={{$json.message}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1040,
+        -96
+      ],
+      "id": "833d7f2f-3e09-4eec-923f-a0918e9e0a00",
+      "name": "Send a message",
+      "webhookId": "dfd0d9cc-599a-4ca7-9bf9-1ec46e5cce0d",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "lsX4R5IQFPYn5Ddc",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "3925d41e-3f38-4856-b121-b4bde8f9978f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f541a3171ae1acaa6b7f73f3126838fa1d2fde65accc01a11cd0984943f976d0"
+  },
+  "id": "dcA4sAPQmvpfdIQk",
+  "tags": []
+}
